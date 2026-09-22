@@ -1,4 +1,9 @@
-export const SHORT_DOMAIN = "dub.sh";
+// Set on self-hosted deployments; unset upstream, where the dub.co domains below apply.
+// Bare hostname, no scheme — matched against the Host header.
+const SELF_HOSTED_APP_DOMAIN = process.env.NEXT_PUBLIC_APP_DOMAIN;
+
+export const SHORT_DOMAIN =
+  process.env.NEXT_PUBLIC_APP_SHORT_DOMAIN || "dub.sh";
 
 export const API_HOSTNAMES = new Set([
   "api.dub.co",
@@ -7,6 +12,7 @@ export const API_HOSTNAMES = new Set([
   "api.localhost:8888",
   "api.localhost",
 ]);
+
 
 export const API_DOMAIN =
   process.env.NEXT_PUBLIC_VERCEL_ENV === "production"
@@ -56,12 +62,22 @@ export const APP_DOMAIN_WITH_NGROK =
       ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL || "preview.dub.co"}`
       : process.env.NEXT_PUBLIC_NGROK_URL || "http://localhost:8888";
 
+export const APP_HOSTNAMES = new Set(
+  [
+    SELF_HOSTED_APP_DOMAIN,
+    "app.dub.co",
+    "preview.dub.co",
+    "localhost:8888",
+    "localhost",
+  ].filter((hostname): hostname is string => Boolean(hostname)),
+);
+
 export const isAppHostname = (hostname: string) => {
   if (process.env.NEXT_PUBLIC_VERCEL_ENV === "preview") {
     // pattern of our preview URLs are always "dub-<random-string>.dub.co"
     return hostname.startsWith("dub-") && hostname.endsWith(".dub.co");
   }
-  return new Set(["app.dub.co", "localhost:8888", "localhost"]).has(hostname);
+  return APP_HOSTNAMES.has(hostname);
 };
 
 export const DUB_LOGO = "https://assets.dub.co/logo.png";

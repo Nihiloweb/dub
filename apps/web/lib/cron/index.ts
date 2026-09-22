@@ -1,8 +1,9 @@
 import { Client } from "@upstash/qstash";
 
+// "unset" placeholder silences SDK warnings when QStash is stubbed for self-hosted MVP.
 export const qstash = new Client({
   baseUrl: process.env.QSTASH_URL || "https://qstash-us-east-1.upstash.io",
-  token: process.env.QSTASH_TOKEN || "",
+  token: process.env.QSTASH_TOKEN || "unset",
   ...(process.env.VERCEL_ENV === "preview" && {
     headers: {
       "x-vercel-protection-bypass":
@@ -15,7 +16,7 @@ export const qstash = new Client({
 // (to avoid forwarding the Vercel automation bypass secret to third party webhook receivers)
 export const qstashWithoutBypass = new Client({
   baseUrl: process.env.QSTASH_URL || "https://qstash-us-east-1.upstash.io",
-  token: process.env.QSTASH_TOKEN || "",
+  token: process.env.QSTASH_TOKEN || "unset",
 });
 
 // Default batch size for cron jobs that process records in batches

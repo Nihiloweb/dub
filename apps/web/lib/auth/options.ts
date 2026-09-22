@@ -32,9 +32,13 @@ import {
 } from "./lock-account";
 import { validatePassword } from "./password";
 import { SSO_LOGIN_PROGRAMS } from "./sso-login-programs";
+import {
+  SESSION_COOKIE_NAME,
+  USE_SECURE_COOKIES,
+  VERCEL_DEPLOYMENT,
+} from "./cookies";
 import { trackDubLead } from "./track-dub-lead";
 
-const VERCEL_DEPLOYMENT = !!process.env.VERCEL_URL;
 
 const CustomPrismaAdapter = (p: PrismaClient) => {
   return {
@@ -377,17 +381,18 @@ export const authOptions: NextAuthOptions = {
   session: { strategy: "jwt" },
   cookies: {
     sessionToken: {
-      name: `${VERCEL_DEPLOYMENT ? "__Secure-" : ""}next-auth.session-token`,
+      name: SESSION_COOKIE_NAME,
       options: {
         httpOnly: true,
         sameSite: "lax",
         path: "/",
         // When working on localhost, the cookie domain must be omitted entirely (https://stackoverflow.com/a/1188145)
         domain: VERCEL_DEPLOYMENT ? ".dub.co" : undefined,
-        secure: VERCEL_DEPLOYMENT,
+        secure: USE_SECURE_COOKIES,
       },
     },
   },
+
   pages: {
     signIn: "/login",
     error: "/login",

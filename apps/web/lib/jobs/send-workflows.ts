@@ -8,7 +8,7 @@ import type { PersistableJob, PublishResult } from "./types";
 
 const workflowClient = new Client({
   baseUrl: process.env.QSTASH_URL || "https://qstash-us-east-1.upstash.io",
-  token: process.env.QSTASH_TOKEN || "",
+  token: process.env.QSTASH_TOKEN || "unset",
   ...(process.env.VERCEL_ENV === "preview" && {
     headers: {
       "x-vercel-protection-bypass":
