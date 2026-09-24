@@ -134,7 +134,7 @@ export function DefaultDomainSelector() {
       {product === "links" && (
         <div className="mx-auto mt-8 w-full max-w-sm">
           <LaterButton
-            next="plan"
+            next="success"
             className="mt-4"
             data-testid={testIds.onboarding.skipDomain}
           />
