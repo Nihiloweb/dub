@@ -105,7 +105,7 @@ export function Form() {
           ...(type && { payoutModel: capitalize(type) }),
         },
       });
-      continueTo("plan");
+      continueTo("success");
       mutate();
     },
     onError: ({ error }) => {
