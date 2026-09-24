@@ -104,3 +104,15 @@ MySQL **8.0** (pas 8.4) : `mysql_native_password` nécessaire pour `ps-http-sim`
 ## Licence
 
 AGPL-3.0 — upstream [dubinc/dub](https://github.com/dubinc/dub). Ce fork ajoute le déploiement Coolify Docker Compose.
+
+## MinIO image (self-host)
+
+Coolify builds `dub-minio:local` from `docker/minio/Dockerfile`, which `FROM dub-minio-base:local`.
+On the VPS, once (or after pruning images):
+
+```bash
+docker tag quay.io/minio/minio:latest dub-minio-base:local
+# or: docker tag minio/minio:latest dub-minio-base:local
+```
+
+Do not change the Dockerfile to a remote MinIO tag — quay.io currently returns 401 on pull.
