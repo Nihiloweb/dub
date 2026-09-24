@@ -133,7 +133,9 @@ services:
 
   # Optional S3-compatible storage for avatars / OG images. Comment out if unused.
   minio:
-    image: quay.io/minio/minio:latest
+    # Docker Hub — quay.io/minio/minio:latest returns 401 on pull for Coolify deploys
+    image: minio/minio:latest
+    pull_policy: if_not_present
     restart: unless-stopped
     command: server /data --console-address ":9001"
     environment:
