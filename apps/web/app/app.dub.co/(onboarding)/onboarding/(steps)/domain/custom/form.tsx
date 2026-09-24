@@ -15,7 +15,7 @@ export function Form() {
   return (
     <AddEditDomainForm
       onSuccess={() => {
-        continueTo(product === "partners" ? "program" : "plan");
+        continueTo(product === "partners" ? "program" : "success");
       }}
       enableDomainConfig={false}
       initialDomain={`${workspaceSlug}.com`}
