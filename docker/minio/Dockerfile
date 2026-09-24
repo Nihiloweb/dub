@@ -1,3 +1,4 @@
-# Uses the MinIO image already present on the Coolify host.
-# Do not change this to a remote tag that requires a pull — quay.io/minio currently 401s.
-FROM quay.io/minio/minio:latest
+# Local-only base (tag on the Coolify host before deploy):
+#   docker tag quay.io/minio/minio:latest dub-minio-base:local
+# Avoids quay.io/Docker Hub 401 during build metadata fetch.
+FROM dub-minio-base:local
