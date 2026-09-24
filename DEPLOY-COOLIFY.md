@@ -107,12 +107,12 @@ AGPL-3.0 — upstream [dubinc/dub](https://github.com/dubinc/dub). Ce fork ajout
 
 ## MinIO image (self-host)
 
-Coolify builds `dub-minio:local` from `docker/minio/Dockerfile`, which `FROM dub-minio-base:local`.
-On the VPS, once (or after pruning images):
+MinIO registries currently return 401/denied. Compose runs `alpine:3.20` and bind-mounts `/home/leo/dub-shared/minio`:
 
 ```bash
-docker tag quay.io/minio/minio:latest dub-minio-base:local
-# or: docker tag minio/minio:latest dub-minio-base:local
+mkdir -p ~/dub-shared
+CID=$(docker create quay.io/minio/minio:latest)  # requires a local minio image
+docker cp "$CID:/usr/bin/minio" ~/dub-shared/minio
+docker rm "$CID"
+chmod +x ~/dub-shared/minio
 ```
-
-Do not change the Dockerfile to a remote MinIO tag — quay.io currently returns 401 on pull.
