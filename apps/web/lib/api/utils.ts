@@ -1,8 +1,10 @@
+import { SESSION_COOKIE_NAME } from "@/lib/auth/cookies";
 import { ipAddress } from "@vercel/functions";
 import { getToken } from "next-auth/jwt";
 import { NextRequest } from "next/server";
 import { ratelimit } from "../upstash";
 import { DubApiError } from "./errors";
+
 
 // TODO move into `lib/api/utils/**` as individual files
 
@@ -27,6 +29,7 @@ export const ratelimitOrThrow = async (
   const session = await getToken({
     req,
     secret: process.env.NEXTAUTH_SECRET,
+    cookieName: SESSION_COOKIE_NAME,
   });
   if (!session?.email) {
     const ip = ipAddress(req);

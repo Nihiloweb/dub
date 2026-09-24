@@ -20,7 +20,7 @@ class StorageClient {
       accessKeyId: process.env.STORAGE_ACCESS_KEY_ID || "",
       secretAccessKey: process.env.STORAGE_SECRET_ACCESS_KEY || "",
       service: "s3",
-      region: "auto",
+      region: process.env.STORAGE_REGION || "auto",
     });
   }
 
@@ -68,7 +68,14 @@ class StorageClient {
       );
 
       if (!response.ok) {
-        throw new Error(response.statusText);
+        const detail = await response.text().catch(() => "");
+        const message = [
+          `${response.status} ${response.statusText}`,
+          detail.trim(),
+        ]
+          .filter(Boolean)
+          .join(" — ");
+        throw new Error(message);
       }
 
       return {

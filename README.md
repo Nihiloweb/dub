@@ -28,6 +28,9 @@
 
 <br/>
 
+> **Nihiloweb fork** — Coolify / Docker Compose self-host MVP (short links, redirects, QR).  
+> See **[DEPLOY-COOLIFY.md](./DEPLOY-COOLIFY.md)**. Upstream: [dubinc/dub](https://github.com/dubinc/dub). License: [AGPL-3.0](./LICENSE.md).
+
 ## Introduction
 
 Dub is the modern, open-source link attribution platform for [short links](https://dub.co/home), [conversion tracking](https://dub.co/analytics), and [affiliate programs](https://dub.co/partners).
@@ -52,7 +55,9 @@ Our platform powers 100M+ clicks and 2M+ links monthly, and is used by world-cla
 
 ## Self-Hosting
 
-You can self-host Dub for greater control over your data and design. [Read this guide](https://dub.co/docs/self-hosting/guide) to learn more.
+**Coolify (this fork):** follow [DEPLOY-COOLIFY.md](./DEPLOY-COOLIFY.md) — Docker Compose with MySQL 8.0, PlanetScale HTTP shim, Redis REST shim; Tinybird/QStash/Stripe stubbed for MVP.
+
+Official guide (Vercel + PlanetScale + Tinybird + Upstash): [dub.co/docs/self-hosting](https://dub.co/docs/self-hosting/guide).
 
 ## Contributing
 

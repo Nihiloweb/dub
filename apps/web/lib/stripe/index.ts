@@ -1,13 +1,17 @@
 import Stripe from "stripe";
 import { StripeMode } from "../types";
 
-export const stripe = new Stripe(`${process.env.STRIPE_SECRET_KEY}`, {
-  apiVersion: "2025-05-28.basil",
-  appInfo: {
-    name: "Dub.co",
-    version: "0.1.0",
+// Placeholder key so module import does not throw during `next build` when Stripe is stubbed (self-hosted MVP).
+export const stripe = new Stripe(
+  process.env.STRIPE_SECRET_KEY || "sk_unset",
+  {
+    apiVersion: "2025-05-28.basil",
+    appInfo: {
+      name: "Dub.co",
+      version: "0.1.0",
+    },
   },
-});
+);
 
 const secretMap: Record<StripeMode, string | undefined> = {
   live: process.env.STRIPE_APP_SECRET_KEY,
@@ -17,9 +21,9 @@ const secretMap: Record<StripeMode, string | undefined> = {
 
 // Stripe Integration App client
 export const stripeAppClient = ({ mode }: { mode?: StripeMode }) => {
-  const appSecretKey = secretMap[mode ?? "live"];
+  const appSecretKey = secretMap[mode ?? "live"] || "sk_unset";
 
-  return new Stripe(appSecretKey!, {
+  return new Stripe(appSecretKey, {
     apiVersion: "2025-05-28.basil",
     appInfo: {
       name: "Dub.co",
@@ -27,6 +31,20 @@ export const stripeAppClient = ({ mode }: { mode?: StripeMode }) => {
     },
   });
 };
+
+export function isStripeRateLimitError(
+  error: unknown,
+): error is Stripe.errors.StripeError {
+  if (!(error instanceof Stripe.errors.StripeError)) {
+    return false;
+  }
+
+  return (
+    error instanceof Stripe.errors.StripeRateLimitError ||
+    error.statusCode === 429 ||
+    error.code === "lock_timeout"
+  );
+}
 
 export function isStripeRateLimitError(
   error: unknown,

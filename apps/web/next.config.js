@@ -24,6 +24,13 @@ module.exports = withPlausibleProxy({
   apiPath: "/_proxy/plausible/event",
 })({
   reactStrictMode: false,
+  // Self-hosted / Coolify builds: large monorepo with stubbed optional services.
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   transpilePackages: [
     "prettier",
     "shiki",

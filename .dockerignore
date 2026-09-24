@@ -1,0 +1,23 @@
+# Keep build context small
+.git
+.github
+**/.next
+**/.turbo
+**/node_modules
+**/dist
+**/.env
+**/.env.*
+!**/.env.example
+apps/web/playwright
+apps/web/tests
+apps/web/scripts
+packages/cli
+packages/hubspot-app
+packages/stripe-app
+packages/tinybird
+*.md
+!README.md
+!DEPLOY-COOLIFY.md
+.dockerignore
+Dockerfile
+docker-compose*.yml
