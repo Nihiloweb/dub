@@ -12,7 +12,7 @@ export function Form() {
     <RegisterDomainForm
       saveOnly
       onSuccess={() => {
-        continueTo(product === "partners" ? "program" : "plan");
+        continueTo(product === "partners" ? "program" : "success");
       }}
     />
   );
