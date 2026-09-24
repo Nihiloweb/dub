@@ -1,12 +1,10 @@
-# Merged automatically by `docker compose up` locally.
-# Coolify typically passes -f and does not load this file — set build in Coolify UI or bake an image.
+# Merged automatically by `docker compose up` locally (Coolify ignores it).
+# Publishes host ports for local development.
 services:
   dub:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        DATABASE_URL: mysql://root:${DB_ROOT_PASSWORD:-build}@db:3306/dub
-        NEXT_PUBLIC_APP_DOMAIN: ${NEXT_PUBLIC_APP_DOMAIN}
-        NEXT_PUBLIC_APP_SHORT_DOMAIN: ${NEXT_PUBLIC_APP_SHORT_DOMAIN}
-    image: dub:local
+    ports:
+      - "${DUB_PORT:-3000}:3000"
+  minio:
+    ports:
+      - "${MINIO_API_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
