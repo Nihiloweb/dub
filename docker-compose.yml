@@ -1,20 +1,15 @@
 # Docker Compose stack for Coolify / self-hosted Dub MVP
 # App listens on port 3000. See DEPLOY-COOLIFY.md for setup.
 #
-# The dub service builds from the repo Dockerfile (Coolify builds it on deploy).
+# The dub service pulls a prebuilt image from GHCR (built by .github/workflows/docker-image.yml).
+# Never build the Dub image on the VPS — it OOMs. Local builds: docker-compose.override.yml.
 # No host ports are published: Coolify's Traefik routes to dub:3000.
-# For local access, docker-compose.override.yml publishes ports.
 
 services:
   dub:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        DATABASE_URL: mysql://root:${DB_ROOT_PASSWORD:-build}@db:3306/dub
-        NEXT_PUBLIC_APP_DOMAIN: ${NEXT_PUBLIC_APP_DOMAIN}
-        NEXT_PUBLIC_APP_SHORT_DOMAIN: ${NEXT_PUBLIC_APP_SHORT_DOMAIN}
-    image: ${DUB_IMAGE:-dub:local}
+    # Image built by GitHub Actions → ghcr.io/nihiloweb/dub (never build on the VPS).
+    image: ${DUB_IMAGE:-ghcr.io/nihiloweb/dub:latest}
+    pull_policy: always
     restart: unless-stopped
     expose:
       - "3000"

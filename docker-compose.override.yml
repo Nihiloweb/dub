@@ -1,7 +1,16 @@
 # Merged automatically by `docker compose up` locally (Coolify ignores it).
-# Publishes host ports for local development.
+# Publishes host ports for local development and enables a local image build.
 services:
   dub:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        DATABASE_URL: mysql://root:${DB_ROOT_PASSWORD:-build}@db:3306/dub
+        NEXT_PUBLIC_APP_DOMAIN: ${NEXT_PUBLIC_APP_DOMAIN:-localhost}
+        NEXT_PUBLIC_APP_SHORT_DOMAIN: ${NEXT_PUBLIC_APP_SHORT_DOMAIN:-localhost}
+    image: ${DUB_IMAGE:-dub:local}
+    pull_policy: build
     ports:
       - "${DUB_PORT:-3000}:3000"
   minio:
