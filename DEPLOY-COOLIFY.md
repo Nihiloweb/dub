@@ -42,19 +42,35 @@ Sans cette étape → erreurs « table does not exist ».
 3. Ajouter le domaine short dans l’UI (Settings → Domains) = `NEXT_PUBLIC_APP_SHORT_DOMAIN`.
 4. Créer un short link → tester la redirection et le QR.
 
-## Limite du plan free (25 liens)
+## Plan self-hosté (enterprise, sans Stripe)
 
-Un workspace neuf est en plan `free` (`linksLimit` = 25). Sans Stripe, lever les limites en SQL :
+Les nouveaux workspaces sont créés en plan `enterprise` avec limites illimitées (`INFINITY_NUMBER` = 1e9). L’étape onboarding `/onboarding/plan` est ignorée.
+
+Pour un workspace déjà existant resté en `free` :
 
 ```sql
 UPDATE Project
-SET plan = 'business',
-    linksLimit = 1000000,
-    domainsLimit = 100
+SET plan = 'enterprise',
+    planTier = 1,
+    usageLimit = 1000000000,
+    linksLimit = 1000000000,
+    domainsLimit = 1000000000,
+    tagsLimit = 1000000000,
+    foldersLimit = 1000000000,
+    groupsLimit = 1000000000,
+    usersLimit = 1000000000,
+    aiLimit = 1000000000,
+    payoutsLimit = 1000000000,
+    partnersLimit = 1000000000,
+    networkInvitesLimit = 1000000000,
+    partnerTagsLimit = 1000000000,
+    conversionEnabled = 1,
+    webhookEnabled = 1
 WHERE slug = 'votre-workspace-slug';
 ```
 
-Redémarrer `dub` ensuite (cache workspace).
+Redémarrer `dub` ensuite (cache workspace). Marquer l’onboarding terminé dans Redis si besoin :
+`SET onboarding-step:<userId> completed EX 86400`
 
 ## Variables importantes
 
