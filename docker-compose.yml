@@ -131,21 +131,21 @@ services:
     depends_on:
       - redis
 
-  # Optional S3-compatible storage for avatars / OG images.
-  # Alpine is pullable; MinIO binary is bind-mounted from the host
-  # (quay.io / Docker Hub MinIO pulls currently fail with 401/denied).
-  # Host prep: binary at /home/leo/dub-shared/minio (see DEPLOY-COOLIFY.md)
+  # S3-compatible storage (avatars / OG images).
+  # cgr.dev/chainguard/minio is pullable; quay.io/docker.io minio currently 401/denied.
   minio:
-    image: alpine:3.20
+    image: cgr.dev/chainguard/minio:latest
     pull_policy: if_not_present
+    # Existing volume data is root-owned; run as root for write access.
+    user: "0:0"
     restart: unless-stopped
-    entrypoint: ["/usr/local/bin/minio"]
     command: ["server", "/data", "--console-address", ":9001"]
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+      # Browser uploads from the Dub app (presigned PUT)
+      MINIO_API_CORS_ALLOW_ORIGIN: ${MINIO_API_CORS_ALLOW_ORIGIN:-https://dub.nihiloweb.com}
     volumes:
-      - /home/leo/dub-shared/minio:/usr/local/bin/minio:ro
       - dub-minio:/data
     expose:
       - "9000"
