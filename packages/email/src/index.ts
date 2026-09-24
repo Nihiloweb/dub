@@ -14,12 +14,13 @@ export const sendEmail = async (opts: ResendEmailOptions) => {
   );
 
   if (smtpConfigured) {
-    const { to, subject, text, react } = opts;
+    const { to, subject, text, react, from } = opts;
     return await sendViaNodeMailer({
       to,
       subject,
       text,
       react,
+      from,
     });
   }
 
@@ -49,6 +50,7 @@ export const sendBatchEmail = async (
           subject: p.subject,
           text: p.text,
           react: p.react,
+          from: p.from,
         }),
       ),
     );
