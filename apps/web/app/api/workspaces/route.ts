@@ -11,7 +11,7 @@ import {
   createWorkspaceSchema,
   WorkspaceSchema,
 } from "@/lib/zod/schemas/workspaces";
-import { FREE_WORKSPACES_LIMIT, nanoid, R2_URL } from "@dub/utils";
+import { FREE_WORKSPACES_LIMIT, INFINITY_NUMBER, nanoid, R2_URL } from "@dub/utils";
 import { Prisma } from "@prisma/client";
 import { waitUntil } from "@vercel/functions";
 import { NextResponse } from "next/server";
@@ -109,6 +109,23 @@ export const POST = withSession(async ({ req, session }) => {
             name,
             slug,
             logo: uploadedImageUrl,
+            // Self-hosted: unlock all features (no Stripe)
+            plan: "enterprise",
+            planTier: 1,
+            usageLimit: INFINITY_NUMBER,
+            linksLimit: INFINITY_NUMBER,
+            domainsLimit: INFINITY_NUMBER,
+            tagsLimit: INFINITY_NUMBER,
+            foldersLimit: INFINITY_NUMBER,
+            groupsLimit: INFINITY_NUMBER,
+            usersLimit: INFINITY_NUMBER,
+            aiLimit: INFINITY_NUMBER,
+            payoutsLimit: INFINITY_NUMBER,
+            partnersLimit: INFINITY_NUMBER,
+            networkInvitesLimit: INFINITY_NUMBER,
+            partnerTagsLimit: INFINITY_NUMBER,
+            conversionEnabled: true,
+            webhookEnabled: true,
             users: {
               create: {
                 userId: session.user.id,
