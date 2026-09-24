@@ -105,14 +105,18 @@ MySQL **8.0** (pas 8.4) : `mysql_native_password` nécessaire pour `ps-http-sim`
 
 AGPL-3.0 — upstream [dubinc/dub](https://github.com/dubinc/dub). Ce fork ajoute le déploiement Coolify Docker Compose.
 
-## MinIO image (self-host)
+## MinIO / uploads (self-host)
 
-MinIO registries currently return 401/denied. Compose runs `alpine:3.20` and bind-mounts `/home/leo/dub-shared/minio`:
+Compose uses `cgr.dev/chainguard/minio` (quay/Docker Hub MinIO pulls currently fail).
 
-```bash
-mkdir -p ~/dub-shared
-CID=$(docker create quay.io/minio/minio:latest)  # requires a local minio image
-docker cp "$CID:/usr/bin/minio" ~/dub-shared/minio
-docker rm "$CID"
-chmod +x ~/dub-shared/minio
-```
+Coolify domain for the `minio` service: `https://assets.nihiloweb.com:9000`.
+
+Required env:
+- `STORAGE_ENDPOINT=https://assets.nihiloweb.com` (public; browsers PUT presigned URLs here)
+- `STORAGE_BASE_URL=https://assets.nihiloweb.com/dub-public` (public object URLs include the bucket path)
+- `STORAGE_PUBLIC_BUCKET=dub-public`, `STORAGE_PRIVATE_BUCKET=dub-private`
+- `STORAGE_ACCESS_KEY_ID` / `STORAGE_SECRET_ACCESS_KEY` (= MinIO root user/pass)
+- `MINIO_API_CORS_ALLOW_ORIGIN=https://dub.nihiloweb.com`
+
+After first boot, create buckets + public-read policy (see ops notes / `mc`).
+
