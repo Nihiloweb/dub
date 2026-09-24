@@ -17,7 +17,7 @@ export function Form() {
       fixedDomainSuffix="dub.link"
       enableDomainConfig={false}
       onSuccess={() => {
-        continueTo(product === "partners" ? "program" : "plan");
+        continueTo(product === "partners" ? "program" : "success");
       }}
       isOnboardingSubdomainFlow={true}
     />
