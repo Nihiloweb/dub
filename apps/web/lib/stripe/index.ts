@@ -45,17 +45,3 @@ export function isStripeRateLimitError(
     error.code === "lock_timeout"
   );
 }
-
-export function isStripeRateLimitError(
-  error: unknown,
-): error is Stripe.errors.StripeError {
-  if (!(error instanceof Stripe.errors.StripeError)) {
-    return false;
-  }
-
-  return (
-    error instanceof Stripe.errors.StripeRateLimitError ||
-    error.statusCode === 429 ||
-    error.code === "lock_timeout"
-  );
-}
