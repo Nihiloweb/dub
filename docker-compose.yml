@@ -1,0 +1,144 @@
+# Docker Compose stack for Coolify / self-hosted Dub MVP
+# App listens on port 3000. See DEPLOY-COOLIFY.md for setup.
+#
+# The dub service builds from the repo Dockerfile (Coolify builds it on deploy).
+# No host ports are published: Coolify's Traefik routes to dub:3000.
+# For local access, docker-compose.override.yml publishes ports.
+
+services:
+  dub:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        DATABASE_URL: mysql://root:${DB_ROOT_PASSWORD:-build}@db:3306/dub
+        NEXT_PUBLIC_APP_DOMAIN: ${NEXT_PUBLIC_APP_DOMAIN}
+        NEXT_PUBLIC_APP_SHORT_DOMAIN: ${NEXT_PUBLIC_APP_SHORT_DOMAIN}
+    image: ${DUB_IMAGE:-dub:local}
+    restart: unless-stopped
+    expose:
+      - "3000"
+    environment:
+      PORT: "3000"
+      NEXTAUTH_URL: ${NEXTAUTH_URL}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      CRON_SECRET: ${CRON_SECRET:-}
+      DATABASE_URL: mysql://root:${DB_ROOT_PASSWORD}@db:3306/dub
+      PLANETSCALE_DATABASE_URL: http://root:${DB_ROOT_PASSWORD}@planetscale-proxy:3900/dub
+      UPSTASH_REDIS_REST_URL: http://serverless-redis-http:80
+      UPSTASH_REDIS_REST_TOKEN: ${UPSTASH_REDIS_REST_TOKEN}
+      # Stubbed for MVP (analytics / jobs / billing optional)
+      TINYBIRD_API_KEY: ${TINYBIRD_API_KEY:-}
+      TINYBIRD_API_URL: ${TINYBIRD_API_URL:-https://api.tinybird.co}
+      QSTASH_TOKEN: ${QSTASH_TOKEN:-unset}
+      QSTASH_URL: ${QSTASH_URL:-https://qstash-us-east-1.upstash.io}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-sk_unset}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      STORAGE_ACCESS_KEY_ID: ${STORAGE_ACCESS_KEY_ID:-}
+      STORAGE_SECRET_ACCESS_KEY: ${STORAGE_SECRET_ACCESS_KEY:-}
+      STORAGE_ENDPOINT: ${STORAGE_ENDPOINT:-}
+      STORAGE_REGION: ${STORAGE_REGION:-us-east-1}
+      STORAGE_BASE_URL: ${STORAGE_BASE_URL:-}
+      STORAGE_PUBLIC_BUCKET: ${STORAGE_PUBLIC_BUCKET:-}
+      STORAGE_PRIVATE_BUCKET: ${STORAGE_PRIVATE_BUCKET:-}
+    depends_on:
+      db:
+        condition: service_healthy
+      planetscale-proxy:
+        condition: service_started
+      redis:
+        condition: service_started
+      serverless-redis-http:
+        condition: service_started
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: dub
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    command:
+      [
+        "--max_connections=1000",
+        "--default-authentication-plugin=mysql_native_password"
+      ]
+    volumes:
+      - dub-mysql:/var/lib/mysql
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "127.0.0.1",
+          "-uroot",
+          "-p${DB_ROOT_PASSWORD}"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  planetscale-proxy:
+    image: ghcr.io/mattrobenolt/ps-http-sim:v0.0.12
+    restart: unless-stopped
+    command:
+      [
+        "-listen-addr=0.0.0.0",
+        "-listen-port=3900",
+        "-mysql-addr=db",
+        "-mysql-port=3306",
+        "-mysql-dbname=dub"
+      ]
+    depends_on:
+      db:
+        condition: service_healthy
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+
+  serverless-redis-http:
+    image: hiett/serverless-redis-http:latest
+    restart: unless-stopped
+    environment:
+      SRH_MODE: env
+      SRH_TOKEN: ${UPSTASH_REDIS_REST_TOKEN}
+      SRH_CONNECTION_STRING: redis://redis:6379
+    depends_on:
+      - redis
+
+  # Optional S3-compatible storage for avatars / OG images. Comment out if unused.
+  minio:
+    image: quay.io/minio/minio:latest
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+    volumes:
+      - dub-minio:/data
+    expose:
+      - "9000"
+      - "9001"
+
+volumes:
+  dub-mysql:
+  dub-minio:
