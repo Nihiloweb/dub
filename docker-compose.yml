@@ -131,21 +131,21 @@ services:
     depends_on:
       - redis
 
-  # Optional S3-compatible storage for avatars / OG images. Comment out if unused.
+  # Optional S3-compatible storage for avatars / OG images.
+  # Alpine is pullable; MinIO binary is bind-mounted from the host
+  # (quay.io / Docker Hub MinIO pulls currently fail with 401/denied).
+  # Host prep: binary at /home/leo/dub-shared/minio (see DEPLOY-COOLIFY.md)
   minio:
-    # Built from local base to avoid quay.io/Docker Hub pull failures on deploy.
-    # Base image must already exist on the host (quay.io/minio/minio:latest).
-    build:
-      context: ./docker/minio
-      dockerfile: Dockerfile
-    image: dub-minio:local
-    pull_policy: never
+    image: alpine:3.20
+    pull_policy: if_not_present
     restart: unless-stopped
-    command: server /data --console-address ":9001"
+    entrypoint: ["/usr/local/bin/minio"]
+    command: ["server", "/data", "--console-address", ":9001"]
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
     volumes:
+      - /home/leo/dub-shared/minio:/usr/local/bin/minio:ro
       - dub-minio:/data
     expose:
       - "9000"
