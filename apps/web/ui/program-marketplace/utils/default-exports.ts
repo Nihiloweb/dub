@@ -4,16 +4,19 @@ import { Category } from "@prisma/client";
 export const revalidate = 3600;
 
 export async function generateStaticParams() {
-  const programs = await prisma.program.findMany({
-    where: {
-      addedToMarketplaceAt: {
-        not: null,
+  // Self-hosted: no database during `next build`; pages render on demand.
+  const programs = await prisma.program
+    .findMany({
+      where: {
+        addedToMarketplaceAt: {
+          not: null,
+        },
       },
-    },
-    select: {
-      slug: true,
-    },
-  });
+      select: {
+        slug: true,
+      },
+    })
+    .catch(() => [] as { slug: string }[]);
 
   const categoryPages = Object.values(Category).map((category) => ({
     segments: ["c", category.toLowerCase()],
