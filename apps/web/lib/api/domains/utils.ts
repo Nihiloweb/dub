@@ -1,5 +1,4 @@
-wrote 1731 bytes
- from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 import { DubApiError } from "../errors";
 import { isValidDomain } from "./is-valid-domain";
 import { validateDubLinkSubdomain } from "./validate-dub-link-subdomain";
