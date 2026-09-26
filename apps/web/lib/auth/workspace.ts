@@ -24,13 +24,18 @@ import { rateLimitRequest } from "./rate-limit-request";
 import { TokenCacheItem, tokenCache } from "./token-cache";
 import { Session, getSession } from "./utils";
 
+// Authenticated session traffic only (UI fan-out). Override for self-host via
+// ANALYTICS_SESSION_RATE_LIMIT; default 120 avoids analytics page 429s.
+const analyticsSessionRateLimit =
+  Number(process.env.ANALYTICS_SESSION_RATE_LIMIT) || 120;
+
 const RATE_LIMIT_FOR_SESSIONS = {
   api: {
     limit: 600,
     interval: "1 m",
   },
   analyticsApi: {
-    limit: 12,
+    limit: analyticsSessionRateLimit,
     interval: "1 s",
   },
 } as const;
