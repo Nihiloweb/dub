@@ -1,6 +1,10 @@
 // Set on self-hosted deployments; unset upstream, where the dub.co domains below apply.
-// Bare hostname, no scheme — matched against the Host header.
+// Bare hostname, no scheme — matched against the Host header / used to build https origins.
 const SELF_HOSTED_APP_DOMAIN = process.env.NEXT_PUBLIC_APP_DOMAIN;
+const SELF_HOSTED_PARTNERS_DOMAIN = process.env.NEXT_PUBLIC_PARTNERS_DOMAIN;
+
+const isRealSelfHostedHostname = (hostname: string | undefined) =>
+  Boolean(hostname && !hostname.startsWith("localhost"));
 
 export const SHORT_DOMAIN =
   process.env.NEXT_PUBLIC_APP_SHORT_DOMAIN || "dub.sh";
@@ -27,36 +31,49 @@ export const ADMIN_HOSTNAMES = new Set([
   "admin.localhost",
 ]);
 
-export const PARTNERS_HOSTNAMES = new Set([
-  "partners.dub.co",
-  "partners-staging.dub.co",
-  "partners.localhost:8888",
-  "partners.localhost",
-]);
+export const PARTNERS_HOSTNAMES = new Set(
+  [
+    SELF_HOSTED_PARTNERS_DOMAIN,
+    "partners.dub.co",
+    "partners-staging.dub.co",
+    "partners.localhost:8888",
+    "partners.localhost",
+  ].filter((hostname): hostname is string => Boolean(hostname)),
+);
 
-export const PARTNERS_DOMAIN =
-  process.env.NEXT_PUBLIC_VERCEL_ENV === "production"
+export const PARTNERS_DOMAIN = isRealSelfHostedHostname(
+  SELF_HOSTED_PARTNERS_DOMAIN,
+)
+  ? `https://${SELF_HOSTED_PARTNERS_DOMAIN}`
+  : process.env.NEXT_PUBLIC_VERCEL_ENV === "production"
     ? "https://partners.dub.co"
     : process.env.NEXT_PUBLIC_VERCEL_ENV === "preview"
       ? "https://partners-staging.dub.co"
       : "http://partners.localhost:8888";
 
-export const PARTNERS_DOMAIN_WITH_NGROK =
-  process.env.NEXT_PUBLIC_VERCEL_ENV === "production"
+export const PARTNERS_DOMAIN_WITH_NGROK = isRealSelfHostedHostname(
+  SELF_HOSTED_PARTNERS_DOMAIN,
+)
+  ? `https://${SELF_HOSTED_PARTNERS_DOMAIN}`
+  : process.env.NEXT_PUBLIC_VERCEL_ENV === "production"
     ? "https://partners.dub.co"
     : process.env.NEXT_PUBLIC_VERCEL_ENV === "preview"
       ? "https://partners-staging.dub.co"
       : process.env.NEXT_PUBLIC_NGROK_URL || "http://partners.localhost:8888";
 
-export const APP_DOMAIN =
-  process.env.NEXT_PUBLIC_VERCEL_ENV === "production"
+export const APP_DOMAIN = isRealSelfHostedHostname(SELF_HOSTED_APP_DOMAIN)
+  ? `https://${SELF_HOSTED_APP_DOMAIN}`
+  : process.env.NEXT_PUBLIC_VERCEL_ENV === "production"
     ? "https://app.dub.co"
     : process.env.NEXT_PUBLIC_VERCEL_ENV === "preview"
       ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL || "preview.dub.co"}`
       : "http://localhost:8888";
 
-export const APP_DOMAIN_WITH_NGROK =
-  process.env.NEXT_PUBLIC_VERCEL_ENV === "production"
+export const APP_DOMAIN_WITH_NGROK = isRealSelfHostedHostname(
+  SELF_HOSTED_APP_DOMAIN,
+)
+  ? `https://${SELF_HOSTED_APP_DOMAIN}`
+  : process.env.NEXT_PUBLIC_VERCEL_ENV === "production"
     ? "https://app.dub.co"
     : process.env.NEXT_PUBLIC_VERCEL_ENV === "preview"
       ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL || "preview.dub.co"}`
