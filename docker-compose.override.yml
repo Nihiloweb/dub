@@ -9,6 +9,7 @@ services:
         DATABASE_URL: mysql://root:${DB_ROOT_PASSWORD:-build}@db:3306/dub
         NEXT_PUBLIC_APP_DOMAIN: ${NEXT_PUBLIC_APP_DOMAIN:-localhost}
         NEXT_PUBLIC_APP_SHORT_DOMAIN: ${NEXT_PUBLIC_APP_SHORT_DOMAIN:-localhost}
+        NEXT_PUBLIC_PARTNERS_DOMAIN: ${NEXT_PUBLIC_PARTNERS_DOMAIN:-}
     image: ${DUB_IMAGE:-dub:local}
     pull_policy: build
     ports:

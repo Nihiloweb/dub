@@ -7,7 +7,7 @@ Stack Docker : MySQL 8.0 + `ps-http-sim` (shim PlanetScale HTTP) + Redis + `serv
 ## Prérequis
 
 - Coolify (ou Docker Compose) avec assez de RAM pour le build Next.js (~6–8 Go heap)
-- Deux domaines DNS pointant vers Coolify : **app** + **short**
+- Trois domaines DNS pointant vers Coolify : **app** + **short** + **partners** (tous vers le même service)
 - Secrets générés (ne jamais committer `.env`)
 
 ## Étapes Coolify
@@ -16,11 +16,23 @@ Stack Docker : MySQL 8.0 + `ps-http-sim` (shim PlanetScale HTTP) + Redis + `serv
 2. Fichier Compose : `docker-compose.yml` (racine).
 3. Renseigner les variables d’environnement (voir `.env.example`).
 4. **Build args** obligatoires (inlinés au build, pas seulement au runtime) :
-   - `NEXT_PUBLIC_APP_DOMAIN` — hostname nu, ex. `app.example.com`
-   - `NEXT_PUBLIC_APP_SHORT_DOMAIN` — hostname nu, ex. `go.example.com`
+   - `NEXT_PUBLIC_APP_DOMAIN` — hostname nu, ex. `dub.nihiloweb.com` (dashboard / API)
+   - `NEXT_PUBLIC_APP_SHORT_DOMAIN` — hostname nu, ex. `link.nihiloweb.com` (liens courts)
+   - `NEXT_PUBLIC_PARTNERS_DOMAIN` — hostname nu, ex. `go.nihiloweb.com` (Partner Program UI)
    - `DATABASE_URL` — dummy OK, ex. `mysql://root:build@db:3306/dub`
-5. Domaines Coolify : exposer le service `dub` sur le port **3000** (app + short host → même service).
+5. Domaines Coolify : exposer le service `dub` sur le port **3000** (app + short + partners → même service). Ne pas ajouter `go` comme Domain workspace — c’est un host partenaires, pas un short domain.
 6. Déployer. Attendre le healthcheck `/api/health`.
+
+### Carte domaines Nihiloweb
+
+| Rôle | Hostname | Build arg |
+|---|---|---|
+| App / dashboard | `dub.nihiloweb.com` | `NEXT_PUBLIC_APP_DOMAIN` |
+| Short links | `link.nihiloweb.com` | `NEXT_PUBLIC_APP_SHORT_DOMAIN` |
+| Partner Program | `go.nihiloweb.com` | `NEXT_PUBLIC_PARTNERS_DOMAIN` |
+| Assets MinIO | `assets.nihiloweb.com` | (runtime storage env only) |
+
+Image GHCR (`docker-image.yml`) bake déjà ces trois `NEXT_PUBLIC_*`. Après rebuild/pull, Coolify doit router les trois hosts vers le service `dub:3000`.
 
 En local : `cp .env.example .env`, puis `docker compose up --build` (utilise `docker-compose.override.yml` pour builder depuis les sources).
 
@@ -39,8 +51,8 @@ Sans cette étape → erreurs « table does not exist ».
 
 1. Ouvrir `https://<NEXT_PUBLIC_APP_DOMAIN>` → register / login (Google ou email selon env).
 2. Créer un workspace.
-3. Ajouter le domaine short dans l’UI (Settings → Domains) = `NEXT_PUBLIC_APP_SHORT_DOMAIN`.
-4. Créer un short link → tester la redirection et le QR.
+3. Ajouter le domaine short dans l’UI (Settings → Domains) = `NEXT_PUBLIC_APP_SHORT_DOMAIN` (`link.nihiloweb.com`). Ne pas y ajouter le host partners (`go`).
+4. Créer un short link → tester la redirection et le QR. Ouvrir `https://<NEXT_PUBLIC_PARTNERS_DOMAIN>` pour le Partner Program.
 
 ## Plan self-hosté (enterprise, sans Stripe)
 
@@ -82,7 +94,7 @@ Redémarrer `dub` ensuite (cache workspace). Marquer l’onboarding terminé dan
 | `DATABASE_URL` | `mysql://root:…@db:3306/dub` |
 | `PLANETSCALE_DATABASE_URL` | `http://root:…@planetscale-proxy:3900/dub` |
 | `UPSTASH_REDIS_REST_*` | URL → `http://serverless-redis-http:80`, token = secret inventé |
-| `NEXT_PUBLIC_APP_*` | **build args**, hostnames nus |
+| `NEXT_PUBLIC_APP_*` / `NEXT_PUBLIC_PARTNERS_DOMAIN` | **build args**, hostnames nus (app / short / partners) |
 
 MySQL **8.0** (pas 8.4) : `mysql_native_password` nécessaire pour `ps-http-sim`.
 
