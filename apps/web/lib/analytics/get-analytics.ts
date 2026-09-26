@@ -196,6 +196,15 @@ export const getAnalytics = async (params: AnalyticsFilters) => {
   const response = await pipe(tinybirdParams);
 
   if (groupBy === "count") {
+    // NoopTinybird (self-host without TINYBIRD_API_KEY) returns an empty array.
+    // Other groupBy paths already tolerate that; count must return a zero payload.
+    if (!response.data?.[0]) {
+      if (isDeprecatedClicksEndpoint) {
+        return 0;
+      }
+      return { clicks: 0, leads: 0, sales: 0, saleAmount: 0 };
+    }
+
     const { groupByField, ...rest } = response.data[0];
     // Return the count value for deprecated count endpoints
     if (isDeprecatedClicksEndpoint) {
