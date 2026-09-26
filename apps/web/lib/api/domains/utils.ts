@@ -1,4 +1,5 @@
-import { prisma } from "@/lib/prisma";
+wrote 1731 bytes
+ from "@/lib/prisma";
 import { DubApiError } from "../errors";
 import { isValidDomain } from "./is-valid-domain";
 import { validateDubLinkSubdomain } from "./validate-dub-link-subdomain";
@@ -46,7 +47,12 @@ export interface CustomResponse extends Response {
   error?: { code: string; projectId: string; message: string };
 }
 
-// special case for domains that use a reverse proxy in front of Dub (not recommended)
+// Domains behind a reverse proxy (Coolify/self-host or special Vercel cases).
+// On non-Vercel runtimes there is no VERCEL_API_KEY — treat all domains as
+// proxied so verify/config skip the Vercel API and avoid "Not authorized".
 export const isProxiedDomain = (domain: string) => {
+  if (process.env.VERCEL !== "1") {
+    return true;
+  }
   return ["go.zillow.com"].includes(domain);
 };
