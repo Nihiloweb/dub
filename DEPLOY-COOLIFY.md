@@ -95,6 +95,7 @@ Redémarrer `dub` ensuite (cache workspace). Marquer l’onboarding terminé dan
 | `PLANETSCALE_DATABASE_URL` | `http://root:…@planetscale-proxy:3900/dub` |
 | `UPSTASH_REDIS_REST_*` | URL → `http://serverless-redis-http:80`, token = secret inventé |
 | `NEXT_PUBLIC_APP_*` / `NEXT_PUBLIC_PARTNERS_DOMAIN` | **build args**, hostnames nus (app / short / partners) |
+| `ANALYTICS_SESSION_RATE_LIMIT` | req/s pour `/api/analytics` (session UI). Défaut **120** si non défini. Ne touche pas aux limites API key. |
 
 MySQL **8.0** (pas 8.4) : `mysql_native_password` nécessaire pour `ps-http-sim`.
 
