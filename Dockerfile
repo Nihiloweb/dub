@@ -3,7 +3,7 @@
 # Multi-stage build for Dub (apps/web) monorepo — Coolify / self-hosted.
 # Stages: base → deps → builder → runner
 
-FROM node:24-slim AS base
+FROM node:24.22.1-slim AS base
 ENV PNPM_HOME=/pnpm
 ENV PATH="$PNPM_HOME:$PATH"
 RUN apt-get update \
